@@ -1,0 +1,7 @@
+D:\MyMods\SDV\PrairieKingSkill\PrairieKingSkill\bin\Debug\PrairieKingSkill.dll.config
+D:\MyMods\SDV\PrairieKingSkill\PrairieKingSkill\bin\Debug\PrairieKingSkill.dll
+D:\MyMods\SDV\PrairieKingSkill\PrairieKingSkill\bin\Debug\PrairieKingSkill.pdb
+D:\MyMods\SDV\PrairieKingSkill\PrairieKingSkill\obj\Debug\PrairieKingSkill.csprojResolveAssemblyReference.cache
+D:\MyMods\SDV\PrairieKingSkill\PrairieKingSkill\obj\Debug\PrairieKingSkill.csproj.CoreCompileInputs.cache
+D:\MyMods\SDV\PrairieKingSkill\PrairieKingSkill\obj\Debug\PrairieKingSkill.dll
+D:\MyMods\SDV\PrairieKingSkill\PrairieKingSkill\obj\Debug\PrairieKingSkill.pdb

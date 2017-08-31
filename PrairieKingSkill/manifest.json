@@ -1,0 +1,13 @@
+﻿{
+   "Name": "PrairieKingSkill",
+   "Author": "chillcat",
+   "Version": {
+      "MajorVersion": 0,
+      "MinorVersion": 1,
+      "PatchVersion": 0,
+      "Build": null
+   },
+   "Description": "A mod to git gud at Prairie King",
+   "UniqueID": "chillcat.prairiekingskill",
+   "EntryDll": "PrairieKingSkill.dll"
+}
