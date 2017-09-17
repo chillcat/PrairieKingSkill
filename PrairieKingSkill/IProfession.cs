@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace PrairieKingSkill
 {
-    interface Profession
+    interface IProfession
     {
         string Name { get; }
         int Id { get; }
         string Description { get; }
+        IProfession Parent { get; set; }
+        IProfession Lhs { get; set; }
+        IProfession Rhs { get; set; }
     }
 }

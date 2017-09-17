@@ -40,7 +40,7 @@ namespace PrairieKingSkill
             else didInitSkills = false;
         }
 
-        private void initPrairieKingProfession(SkillsPage skills, int num2, int horizontalPosition, int verticalPosition, int skillLevel, Profession profession)
+        private void initPrairieKingProfession(SkillsPage skills, int num2, int horizontalPosition, int verticalPosition, int skillLevel, IProfession profession)
         {
             var skillBars = (List<ClickableTextureComponent>)Util.GetInstanceField(typeof(SkillsPage), skills, "skillBars");
             skillBars.Add(new ClickableTextureComponent(

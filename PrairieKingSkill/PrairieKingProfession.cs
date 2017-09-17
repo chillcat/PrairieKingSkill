@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PrairieKingSkill
 {
-    class PrairieKingProfession : Profession
+    class PrairieKingProfession : IProfession
     {
         //To avoid id colision for professions
         private const int ProfessionBaseId = 41;
@@ -18,12 +18,12 @@ namespace PrairieKingSkill
         public const int CoinChanceProfessionId = ProfessionBaseId + 5;
         public const int LootChanceProfessionId = ProfessionBaseId + 6;
 
-        public static readonly PrairieKingProfession Lives = new PrairieKingProfession(LivesProfessionId, "LevelUpValue_Lives", "More lives");
         public static readonly PrairieKingProfession ShootingDelay = new PrairieKingProfession(ShootingDelayProfessionId, "LevelUpValue_ShootingDelay", "Shorter shooting delay");
         public static readonly PrairieKingProfession PowerUpDuration = new PrairieKingProfession(PowerUpDurationProfessionId, "LevelUpValue_PowerUpDuration", "Longer power up duration");
-        public static readonly PrairieKingProfession Coins = new PrairieKingProfession(CoinsProfessionId, "LevelUpValue_Coins", "More coins");
+        public static readonly PrairieKingProfession Lives = new PrairieKingProfession(LivesProfessionId, "LevelUpValue_Lives", "More lives");
         public static readonly PrairieKingProfession CoinChance = new PrairieKingProfession(CoinChanceProfessionId, "LevelUpValue_CoinChance", "Higher chance for enemies to drop coins.");
         public static readonly PrairieKingProfession LootChance = new PrairieKingProfession(LootChanceProfessionId, "LevelUpValue_LootChance", "Higher chance for enemies to drop loot.");
+        public static readonly PrairieKingProfession Coins = new PrairieKingProfession(CoinsProfessionId, "LevelUpValue_Coins", "More coins");
 
         private readonly string name;
         public string Name { get { return name; } }
@@ -31,6 +31,12 @@ namespace PrairieKingSkill
         public int Id { get { return id; } }
         private readonly string description;
         public string Description { get { return description; } }
+        private IProfession parent;
+        public IProfession Parent { get { return parent; } set { this.parent = value; } }
+        private IProfession lhs;
+        public IProfession Lhs { get { return lhs; } set { this.lhs = value; } }
+        private IProfession rhs;
+        public IProfession Rhs { get { return rhs; } set { this.rhs = value; } }
 
         private PrairieKingProfession(int id, string name, string description)
         {

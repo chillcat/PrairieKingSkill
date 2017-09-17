@@ -46,11 +46,11 @@ namespace PrairieKingSkill
 
         //private List<string> leftProfessionDescription = new List<string>();
 
-        private Profession leftProfession;
+        private IProfession leftProfession;
 
         //private List<string> rightProfessionDescription = new List<string>();
 
-        private Profession rightProfession;
+        private IProfession rightProfession;
 
         private Rectangle sourceRectForLevelIcon;
 

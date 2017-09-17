@@ -16,30 +16,32 @@ namespace PrairieKingSkill
         public string Description { get { return description; } }
 
         //0-4 are base skills, 5 = Luck, 6 = Cooking
-        private int index;
+        private int index = 7;
         public int Index { get { return index; } }
 
-        private ProfessionTree left = ProfessionTree.builder()
-            .Root(PrairieKingProfession.Lives)
-            .Right(PrairieKingProfession.PowerUpDuration)
-            .Left(PrairieKingProfession.ShootingDelay)
-            .build();
-        public ProfessionTree Left { get { return left; } }
+        private IProfession left;
+        public IProfession Left { get { return left; } }
 
-        private ProfessionTree right = ProfessionTree.builder()
-            .Root(PrairieKingProfession.Coins)
-            .Right(PrairieKingProfession.CoinChance)
-            .Left(PrairieKingProfession.LootChance)
-            .build();
-        public ProfessionTree Right { get { return right; } }
+        private IProfession right;
+        public IProfession Right { get { return right; } }
 
         public PrairieKingSkill(int index)
         {
-            this.index = index;
+            this.index = Math.Min(this.index, index);
             Util.extendExpLength(index);
+            PrairieKingProfession.Lives.Lhs = PrairieKingProfession.PowerUpDuration;
+            PrairieKingProfession.Lives.Rhs = PrairieKingProfession.ShootingDelay;
+            PrairieKingProfession.ShootingDelay.Parent = PrairieKingProfession.Lives;
+            PrairieKingProfession.PowerUpDuration.Parent = PrairieKingProfession.Lives;
+            right = PrairieKingProfession.Lives;
+            PrairieKingProfession.Coins.Lhs = PrairieKingProfession.CoinChance;
+            PrairieKingProfession.Coins.Rhs = PrairieKingProfession.LootChance;
+            PrairieKingProfession.CoinChance.Parent = PrairieKingProfession.Coins;
+            PrairieKingProfession.LootChance.Parent = PrairieKingProfession.Coins;
+            left = PrairieKingProfession.Coins;
         }
 
-        public static readonly int[] expNeededForLevel = new int[] { 1, 2, 3, 1300, 2150, 3300, 4800, 6900, 10000, 15000 };
+        private static readonly int[] expNeededForLevel = new int[] { 200, 400, 800, 1400, 2400, 3200, 5000, 7000, 10000, 16000 };
         public int getSkillLevel()
         {
             Util.extendExpLength(index);
@@ -80,26 +82,25 @@ namespace PrairieKingSkill
             return getSkillLevel();
         }
 
-        public List<Profession> getLevel5Choices()
+        public List<IProfession> getLevel5Choices()
         {
-            return new List<Profession>() { left.Root, right.Root };
+            return new List<IProfession>() { left, right };
         }
 
-        public List<Profession> getLevel10Choices()
+        public List<IProfession> getLevel10Choices()
         {
-            ProfessionTree chosenTree = getChosenTree(level5Profession);
-            return new List<Profession>() { chosenTree.Root, chosenTree.Root };
+            return new List<IProfession>() { level5Profession.Lhs, level5Profession.Rhs };
         }
 
-        private List<Profession> aquiredProfessions = new List<Profession>();
-        public List<Profession> AquiredProfessions { get { return aquiredProfessions; } }
-        private Profession level5Profession;
-        public Profession Level5Profession { get { return level5Profession; } }
-        private Profession level10Profession;
-        public Profession Level10Profession { get { return level10Profession; } }
-        public void chooseLevel5Profession(Profession profession)
+        private HashSet<IProfession> aquiredProfessions = new HashSet<IProfession>();
+        public HashSet<IProfession> AquiredProfessions { get { return aquiredProfessions; } }
+        private IProfession level5Profession;
+        public IProfession Level5Profession { get { return level5Profession; } }
+        private IProfession level10Profession;
+        public IProfession Level10Profession { get { return level10Profession; } }
+        public void chooseLevel5Profession(IProfession profession)
         {
-            if (left.Root.Equals(profession) || right.Root.Equals(profession))
+            if (left.Equals(profession) || right.Equals(profession))
             {
                 aquiredProfessions.Add(profession);
                 level5Profession = profession;
@@ -109,10 +110,9 @@ namespace PrairieKingSkill
             }
         }
 
-        public void chooseLevel10Profession(Profession profession)
+        public void chooseLevel10Profession(IProfession profession)
         {
-            ProfessionTree chosenTree = getChosenTree(level5Profession);
-            if (chosenTree.Left.Equals(profession) || chosenTree.Right.Equals(profession))
+            if (level5Profession.Lhs.Equals(profession) || level5Profession.Rhs.Equals(profession))
             {
                 aquiredProfessions.Add(profession);
                 level10Profession = profession;
@@ -123,9 +123,9 @@ namespace PrairieKingSkill
             }
         }
 
-        private ProfessionTree getChosenTree(Profession profession)
+        private IProfession getChosenTree(IProfession profession)
         {
-            return left.Root.Equals(profession) ? left : right;
+            return left.Equals(profession) ? left : right;
         }
     }
 }

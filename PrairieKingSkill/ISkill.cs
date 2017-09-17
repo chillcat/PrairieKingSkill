@@ -9,8 +9,8 @@ namespace PrairieKingSkill
     interface ISkill
     {
         int Index { get; }
-        ProfessionTree Right { get; }
-        ProfessionTree Left { get; }
+        IProfession Right { get; }
+        IProfession Left { get; }
         int getSkillLevel();
     }
 }
