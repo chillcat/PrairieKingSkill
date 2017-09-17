@@ -45,6 +45,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PrairieKingSkill.cs" />
+    <Compile Include="PrairieKingSkillMenuEntry.cs" />
+    <Compile Include="ProfessionTree.cs" />
+    <Compile Include="ISkill.cs" />
+    <Compile Include="Util.cs" />
     <Compile Include="PrairieKingProfession.cs" />
     <Compile Include="PrairieKingLevelUpMenu.cs" />
     <Compile Include="ModEntry.cs" />
