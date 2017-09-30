@@ -2,7 +2,7 @@
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
-[Rr]eleases/
+_releases/
 x64/
 x86/
 bld/
