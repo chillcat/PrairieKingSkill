@@ -24,7 +24,7 @@ namespace PrairieKingSkill
 
         private int currentLevel;
 
-        private int currentSkill;
+        private PrairieKingSkill currentSkill;
 
         private int timerBeforeStart;
 
@@ -68,7 +68,7 @@ namespace PrairieKingSkill
             this.okButton = new ClickableTextureComponent(new Rectangle(this.xPositionOnScreen + this.width + 4, this.yPositionOnScreen + this.height - Game1.tileSize - IClickableMenu.borderWidth, Game1.tileSize, Game1.tileSize), Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46, -1, -1), 1f, false);
         }
 
-        public PrairieKingLevelUpMenu(int skill, int level)
+        public PrairieKingLevelUpMenu(PrairieKingSkill skill)
             : base(Game1.viewport.Width / 2 - 384, Game1.viewport.Height / 2 - 256, 768, 512, false)
         {
             this.timerBeforeStart = 250;
@@ -81,110 +81,33 @@ namespace PrairieKingSkill
             Game1.player.completelyStopAnimatingOrDoingAction();
             this.informationUp = true;
             this.isProfessionChooser = false;
-            this.currentLevel = level;
+            this.currentLevel = skill.getSkillLevel();
             this.currentSkill = skill;
-            if (level == 10)
-            {
-                Game1.getSteamAchievement("Achievement_SingularTalent");
-                if (Game1.player.farmingLevel == 10 && Game1.player.miningLevel == 10 && Game1.player.fishingLevel == 10 && Game1.player.foragingLevel == 10 && Game1.player.combatLevel == 10)
-                {
-                    Game1.getSteamAchievement("Achievement_MasterOfTheFiveWays");
-                }
-            }
             this.title = string.Concat(new object[]
             {
                 "Level ",
                 this.currentLevel,
                 " ",
-                SFarmer.getSkillNameFromIndex(this.currentSkill)
+                currentSkill.Name
             });
-            this.extraInfoForLevel = this.getExtraInfoForLevel(this.currentSkill, this.currentLevel);
-            switch (this.currentSkill)
+            this.extraInfoForLevel = new List<string>();
+            this.extraInfoForLevel.Add(currentSkill.Description);
+            Tuple<IProfession, IProfession> professionChoices = null;
+            if (currentSkill.Level5LevelUp)
             {
-                case 0:
-                    this.sourceRectForLevelIcon = new Rectangle(0, 0, 16, 16);
-                    break;
-                case 1:
-                    this.sourceRectForLevelIcon = new Rectangle(16, 0, 16, 16);
-                    break;
-                case 2:
-                    this.sourceRectForLevelIcon = new Rectangle(80, 0, 16, 16);
-                    break;
-                case 3:
-                    this.sourceRectForLevelIcon = new Rectangle(32, 0, 16, 16);
-                    break;
-                case 4:
-                    this.sourceRectForLevelIcon = new Rectangle(128, 16, 16, 16);
-                    break;
-                case 5:
-                    this.sourceRectForLevelIcon = new Rectangle(64, 0, 16, 16);
-                    break;
+                professionChoices = currentSkill.getLevel5Choices();
             }
-            if ((this.currentLevel == 5 || this.currentLevel == 10) /*&& this.currentSkill != 5*/)
+            else if (currentSkill.Level10LevelUp)
             {
-                //this.professionsToChoose.Clear();
+                professionChoices = currentSkill.getLevel10Choices();
+            }
+            if(professionChoices != null)
+            {
                 this.isProfessionChooser = true;
-                PrairieKingProfession left;
-                PrairieKingProfession right;
-                if (this.currentLevel == 5)
-                {
-                    left = PrairieKingProfession.Lives;
-                    right = PrairieKingProfession.Coins;
-                }
-                else if (Game1.player.professions.Contains(PrairieKingProfession.Lives.Id))
-                {
-                    left = PrairieKingProfession.PowerUpDuration;
-                    right = PrairieKingProfession.ShootingDelay;
-                }
-                else
-                {
-                    left = PrairieKingProfession.CoinChance;
-                    right = PrairieKingProfession.LootChance;
-                }
-                //this.professionsToChoose.Add(left.Id);
-                //this.professionsToChoose.Add(right.Id);
-                this.leftProfession = left;
-                this.rightProfession = right;
-                //this.leftProfessionDescription = PrairieKingLevelUpMenu.getProfessionDescriptions(left.Name);
-                //this.rightProfessionDescription = PrairieKingLevelUpMenu.getProfessionDescriptions(left.Name);
+                this.leftProfession = professionChoices.Item1;
+                this.rightProfession = professionChoices.Item2;
             }
             int num = 0;
-            foreach (KeyValuePair<string, string> current in CraftingRecipe.craftingRecipes)
-            {
-                string text = current.Value.Split(new char[]
-                {
-                    '/'
-                })[4];
-                if (text.Contains(SFarmer.getSkillNameFromIndex(this.currentSkill)) && text.Contains(string.Concat(this.currentLevel)))
-                {
-                    this.newCraftingRecipes.Add(new CraftingRecipe(current.Key, false));
-                    if (!Game1.player.craftingRecipes.ContainsKey(current.Key))
-                    {
-                        Game1.player.craftingRecipes.Add(current.Key, 0);
-                    }
-                    num += (this.newCraftingRecipes.Last<CraftingRecipe>().bigCraftable ? (Game1.tileSize * 2) : Game1.tileSize);
-                }
-            }
-            foreach (KeyValuePair<string, string> current2 in CraftingRecipe.cookingRecipes)
-            {
-                string text2 = current2.Value.Split(new char[]
-                {
-                    '/'
-                })[3];
-                if (text2.Contains(SFarmer.getSkillNameFromIndex(this.currentSkill)) && text2.Contains(string.Concat(this.currentLevel)))
-                {
-                    this.newCraftingRecipes.Add(new CraftingRecipe(current2.Key, true));
-                    if (!Game1.player.cookingRecipes.ContainsKey(current2.Key))
-                    {
-                        Game1.player.cookingRecipes.Add(current2.Key, 0);
-                        if (!Game1.player.hasOrWillReceiveMail("robinKitchenLetter"))
-                        {
-                            Game1.mailbox.Enqueue("robinKitchenLetter");
-                        }
-                    }
-                    num += (this.newCraftingRecipes.Last<CraftingRecipe>().bigCraftable ? (Game1.tileSize * 2) : Game1.tileSize);
-                }
-            }
             this.height = num + Game1.tileSize * 4 + this.extraInfoForLevel.Count<string>() * Game1.tileSize * 3 / 4;
             Game1.player.freezePause = 100;
             this.gameWindowSizeChanged(Rectangle.Empty, Rectangle.Empty);
@@ -201,62 +124,12 @@ namespace PrairieKingSkill
         {
         }
 
-        public List<string> getExtraInfoForLevel(int whichSkill, int whichLevel)
-        {
-            List<string> list = new List<string>();
-            switch (whichSkill)
-            {
-                case 0:
-                    list.Add(Game1.content.LoadString("Strings\\UI:LevelUp_ExtraInfo_Farming1", new object[0]));
-                    list.Add(Game1.content.LoadString("Strings\\UI:LevelUp_ExtraInfo_Farming2", new object[0]));
-                    break;
-                case 1:
-                    list.Add(Game1.content.LoadString("Strings\\UI:LevelUp_ExtraInfo_Fishing", new object[0]));
-                    break;
-                case 2:
-                    list.Add(Game1.content.LoadString("Strings\\UI:LevelUp_ExtraInfo_Foraging1", new object[0]));
-                    if (whichLevel == 1)
-                    {
-                        list.Add(Game1.content.LoadString("Strings\\UI:LevelUp_ExtraInfo_Foraging2", new object[0]));
-                    }
-                    if (whichLevel == 4 || whichLevel == 8)
-                    {
-                        list.Add(Game1.content.LoadString("Strings\\UI:LevelUp_ExtraInfo_Foraging3", new object[0]));
-                    }
-                    break;
-                case 3:
-                    list.Add(Game1.content.LoadString("Strings\\UI:LevelUp_ExtraInfo_Mining", new object[0]));
-                    break;
-                case 4:
-                    list.Add(Game1.content.LoadString("Strings\\UI:LevelUp_ExtraInfo_Combat", new object[0]));
-                    break;
-                case 5:
-                    list.Add(Game1.content.LoadString("Strings\\UI:LevelUp_ExtraInfo_Luck", new object[0]));
-                    break;
-            }
-            return list;
-        }
-
         public override void receiveRightClick(int x, int y, bool playSound = true)
         {
         }
 
         public override void performHoverAction(int x, int y)
         {
-        }
-
-        public void getImmediateProfessionPerk(int whichProfession)
-        {
-            if (whichProfession == 24)
-            {
-                Game1.player.maxHealth += 15;
-                return;
-            }
-            if (whichProfession != 27)
-            {
-                return;
-            }
-            Game1.player.maxHealth += 25;
         }
 
         public override void update(GameTime time)
@@ -313,7 +186,6 @@ namespace PrairieKingSkill
                         if (((Mouse.GetState().LeftButton == ButtonState.Pressed && this.oldMouseState.LeftButton == ButtonState.Released) || (Game1.options.gamepadControls && GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.A) && !Game1.oldPadState.IsButtonDown(Buttons.A))) && this.readyToClose())
                         {
                             Game1.player.professions.Add(this.leftProfession.Id);
-                            this.getImmediateProfessionPerk(this.leftProfession.Id);
                             this.isActive = false;
                             this.informationUp = false;
                             this.isProfessionChooser = false;
@@ -325,7 +197,6 @@ namespace PrairieKingSkill
                         if (((Mouse.GetState().LeftButton == ButtonState.Pressed && this.oldMouseState.LeftButton == ButtonState.Released) || (Game1.options.gamepadControls && GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.A) && !Game1.oldPadState.IsButtonDown(Buttons.A))) && this.readyToClose())
                         {
                             Game1.player.professions.Add(this.rightProfession.Id);
-                            this.getImmediateProfessionPerk(this.rightProfession.Id);
                             this.isActive = false;
                             this.informationUp = false;
                             this.isProfessionChooser = false;
@@ -354,96 +225,31 @@ namespace PrairieKingSkill
                 Game1.playSound("bigSelect");
                 this.informationUp = true;
                 this.isProfessionChooser = false;
-                this.currentLevel = Game1.player.newLevels.First<Point>().Y;
-                this.currentSkill = Game1.player.newLevels.First<Point>().X;
+                //this.currentLevel = Game1.player.newLevels.First<Point>().Y;
+                //this.currentSkill = Game1.player.newLevels.First<Point>().X;
                 this.title = Game1.content.LoadString("Strings\\UI:LevelUp_Title", new object[]
                 {
                 this.currentLevel,
-                SFarmer.getSkillNameFromIndex(this.currentSkill)
+                currentSkill.Name
                 });
-                this.extraInfoForLevel = this.getExtraInfoForLevel(this.currentSkill, this.currentLevel);
-                switch (this.currentSkill)
+                this.extraInfoForLevel = new List<string>();
+                this.extraInfoForLevel.Add(currentSkill.Description);
+                Tuple<IProfession, IProfession> professionChoices = null;
+                if (currentSkill.Level5LevelUp)
                 {
-                    case 0:
-                        this.sourceRectForLevelIcon = new Rectangle(0, 0, 16, 16);
-                        break;
-                    case 1:
-                        this.sourceRectForLevelIcon = new Rectangle(16, 0, 16, 16);
-                        break;
-                    case 2:
-                        this.sourceRectForLevelIcon = new Rectangle(80, 0, 16, 16);
-                        break;
-                    case 3:
-                        this.sourceRectForLevelIcon = new Rectangle(32, 0, 16, 16);
-                        break;
-                    case 4:
-                        this.sourceRectForLevelIcon = new Rectangle(128, 16, 16, 16);
-                        break;
-                    case 5:
-                        this.sourceRectForLevelIcon = new Rectangle(64, 0, 16, 16);
-                        break;
+                    professionChoices = currentSkill.getLevel5Choices();
                 }
-                if ((this.currentLevel == 5 || this.currentLevel == 10) /*&& this.currentSkill != 5*/)
+                else if (currentSkill.Level10LevelUp)
                 {
-                    //this.professionsToChoose.Clear();
+                    professionChoices = currentSkill.getLevel10Choices();
+                }
+                if (professionChoices != null)
+                {
                     this.isProfessionChooser = true;
-                    PrairieKingProfession left;
-                    PrairieKingProfession right;
-                    if (this.currentLevel == 5)
-                    {
-                        left = PrairieKingProfession.Lives;
-                        right = PrairieKingProfession.Coins;
-                    }
-                    else if (Game1.player.professions.Contains(PrairieKingProfession.Lives.Id))
-                    {
-                        left = PrairieKingProfession.PowerUpDuration;
-                        right = PrairieKingProfession.ShootingDelay;
-                    }
-                    else
-                    {
-                        left = PrairieKingProfession.CoinChance;
-                        right = PrairieKingProfession.LootChance;
-                    }
-                    //this.professionsToChoose.Add(left.Id);
-                    //this.professionsToChoose.Add(right.Id);
-                    this.leftProfession = left;
-                    this.rightProfession = right;
-                    //this.leftProfessionDescription = PrairieKingLevelUpMenu.getProfessionDescriptions(left.Name);
-                    //this.rightProfessionDescription = PrairieKingLevelUpMenu.getProfessionDescriptions(left.Name);
+                    this.leftProfession = professionChoices.Item1;
+                    this.rightProfession = professionChoices.Item2;
                 }
                 int num = 0;
-                foreach (KeyValuePair<string, string> current in CraftingRecipe.craftingRecipes)
-                {
-                    string text = current.Value.Split(new char[]
-                    {
-                        '/'
-                    })[4];
-                    if (text.Contains(SFarmer.getSkillNameFromIndex(this.currentSkill)) && text.Contains(string.Concat(this.currentLevel)))
-                    {
-                        this.newCraftingRecipes.Add(new CraftingRecipe(current.Key, false));
-                        if (!Game1.player.craftingRecipes.ContainsKey(current.Key))
-                        {
-                            Game1.player.craftingRecipes.Add(current.Key, 0);
-                        }
-                        num += (this.newCraftingRecipes.Last<CraftingRecipe>().bigCraftable ? (Game1.tileSize * 2) : Game1.tileSize);
-                    }
-                }
-                foreach (KeyValuePair<string, string> current2 in CraftingRecipe.cookingRecipes)
-                {
-                    string text2 = current2.Value.Split(new char[]
-                    {
-                        '/'
-                    })[3];
-                    if (text2.Contains(SFarmer.getSkillNameFromIndex(this.currentSkill)) && text2.Contains(string.Concat(this.currentLevel)))
-                    {
-                        this.newCraftingRecipes.Add(new CraftingRecipe(current2.Key, true));
-                        if (!Game1.player.cookingRecipes.ContainsKey(current2.Key))
-                        {
-                            Game1.player.cookingRecipes.Add(current2.Key, 0);
-                        }
-                        num += (this.newCraftingRecipes.Last<CraftingRecipe>().bigCraftable ? (Game1.tileSize * 2) : Game1.tileSize);
-                    }
-                }
                 this.height = num + Game1.tileSize * 4 + this.extraInfoForLevel.Count<string>() * Game1.tileSize * 3 / 4;
                 Game1.player.freezePause = 100;
             }
@@ -455,7 +261,6 @@ namespace PrairieKingSkill
                     this.okButton.scale = Math.Min(1.1f, this.okButton.scale + 0.05f);
                     if ((this.oldMouseState.LeftButton == ButtonState.Pressed || (Game1.options.gamepadControls && Game1.oldPadState.IsButtonDown(Buttons.A))) && this.readyToClose())
                     {
-                        this.getLevelPerk(this.currentSkill, this.currentLevel);
                         this.isActive = false;
                         this.informationUp = false;
                     }
@@ -470,33 +275,6 @@ namespace PrairieKingSkill
 
         public override void receiveKeyPress(Keys key)
         {
-        }
-
-        public void getLevelPerk(int skill, int level)
-        {
-            if (skill != 1)
-            {
-                if (skill == 4)
-                {
-                    Game1.player.maxHealth += 5;
-                }
-            }
-            else if (level != 2)
-            {
-                if (level == 6)
-                {
-                    if (!Game1.player.hasOrWillReceiveMail("fishing6"))
-                    {
-                        Game1.addMailForTomorrow("fishing6", false, false);
-                    }
-                }
-            }
-            else if (!Game1.player.hasOrWillReceiveMail("fishing2"))
-            {
-                Game1.addMailForTomorrow("fishing2", false, false);
-            }
-            Game1.player.health = Game1.player.maxHealth;
-            Game1.player.Stamina = (float)Game1.player.maxStamina;
         }
 
         public override void draw(SpriteBatch b)

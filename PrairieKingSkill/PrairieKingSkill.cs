@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PrairieKingSkill
 {
-    class PrairieKingSkill : ISkill
+    class PrairieKingSkill : ISkill<PrairieKingProfession>
     {
         private string name = "PrairieKing";
         public string Name { get { return name; } }
@@ -19,11 +19,13 @@ namespace PrairieKingSkill
         private int index = 7;
         public int Index { get { return index; } }
 
-        private IProfession left;
-        public IProfession Left { get { return left; } }
+        private PrairieKingProfession left;
+        public PrairieKingProfession Left { get { return left; } }
 
-        private IProfession right;
-        public IProfession Right { get { return right; } }
+        private PrairieKingProfession right;
+        public PrairieKingProfession Right { get { return right; } }
+
+        private bool allProfessions;
 
         public PrairieKingSkill(int index)
         {
@@ -39,11 +41,17 @@ namespace PrairieKingSkill
             PrairieKingProfession.CoinChance.Parent = PrairieKingProfession.Coins;
             PrairieKingProfession.LootChance.Parent = PrairieKingProfession.Coins;
             left = PrairieKingProfession.Coins;
+            allProfessions = false;
         }
 
         private static readonly int[] expNeededForLevel = new int[] { 200, 400, 800, 1400, 2400, 3200, 5000, 7000, 10000, 16000 };
         public int getSkillLevel()
         {
+            if (allProfessions)
+            {
+                return 10;
+            }
+
             Util.extendExpLength(index);
             for (int i = expNeededForLevel.Length - 1; i >= 0; --i)
             {
@@ -56,6 +64,18 @@ namespace PrairieKingSkill
             return 0;
         }
 
+        public int getExpForLevel(int level)
+        {
+            if (level < 10)
+            {
+                return expNeededForLevel[level];
+            }
+            else
+            {
+                return expNeededForLevel[expNeededForLevel.Length - 1];
+            }
+        }
+
         private bool level5LevelUp;
         public bool Level5LevelUp { get { return level5LevelUp; } }
         private bool level10LevelUp;
@@ -63,6 +83,12 @@ namespace PrairieKingSkill
         public int addExp(int amt)
         {
             int maxExp = expNeededForLevel[expNeededForLevel.Length - 1];
+
+            if (allProfessions)
+            {
+                return maxExp;
+            }
+
             if (amt > 0 && !(Game1.player.experiencePoints[index] == maxExp))
             {
                 int oldLevel = getSkillLevel();
@@ -82,14 +108,14 @@ namespace PrairieKingSkill
             return getSkillLevel();
         }
 
-        public List<IProfession> getLevel5Choices()
+        public Tuple<IProfession, IProfession> getLevel5Choices()
         {
-            return new List<IProfession>() { left, right };
+            return new Tuple<IProfession, IProfession>(left, right);
         }
 
-        public List<IProfession> getLevel10Choices()
+        public Tuple<IProfession, IProfession> getLevel10Choices()
         {
-            return new List<IProfession>() { level5Profession.Lhs, level5Profession.Rhs };
+            return new Tuple<IProfession, IProfession>(level5Profession.Lhs, level5Profession.Rhs);
         }
 
         private HashSet<IProfession> aquiredProfessions = new HashSet<IProfession>();
@@ -98,34 +124,32 @@ namespace PrairieKingSkill
         public IProfession Level5Profession { get { return level5Profession; } }
         private IProfession level10Profession;
         public IProfession Level10Profession { get { return level10Profession; } }
-        public void chooseLevel5Profession(IProfession profession)
+        public void aquireProfession(PrairieKingProfession profession)
         {
+            aquiredProfessions.Add(profession);
+
             if (left.Equals(profession) || right.Equals(profession))
             {
-                aquiredProfessions.Add(profession);
                 level5Profession = profession;
+                level5LevelUp = false;
             } else
             {
-                throw new Exception(profession + " is not a valid level 5 profession.");
-            }
-        }
-
-        public void chooseLevel10Profession(IProfession profession)
-        {
-            if (level5Profession.Lhs.Equals(profession) || level5Profession.Rhs.Equals(profession))
-            {
-                aquiredProfessions.Add(profession);
                 level10Profession = profession;
-            }
-            else
-            {
-                throw new Exception(profession + " is not a valid level 10 profession for " + level5Profession);
+                level10LevelUp = false;
             }
         }
 
-        private IProfession getChosenTree(IProfession profession)
+        public void setAllProfessions()
         {
-            return left.Equals(profession) ? left : right;
+            aquiredProfessions.Add(right);
+            aquiredProfessions.Add(right.Lhs);
+            aquiredProfessions.Add(right.Rhs);
+            aquiredProfessions.Add(left);
+            aquiredProfessions.Add(left.Lhs);
+            aquiredProfessions.Add(left.Rhs);
+            level5Profession = right;
+            level10Profession = right.Lhs;
+            allProfessions = true;
         }
     }
 }
